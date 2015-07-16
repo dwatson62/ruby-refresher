@@ -1,16 +1,11 @@
 # keep only the elements that start with an a
 def select_elements_starting_with_a(array)
-  array.each do |word|
-    if word.chr != 'a'
-      array.delete(word)
-    end
-  end
-  array
+  array.select! { |word| word =~ /^[a]/}
 end
 
 # keep only the elements that start with a vowel
 def select_elements_starting_with_vowel(array)
-  array.select! { |word| word[0] += /[aieou]/ }
+  array.select!{ |x| x =~ /^[aeiou]/}
 end
 
 # remove instances of nil (but NOT false) from an array
@@ -20,22 +15,13 @@ end
 
 # remove instances of nil AND false from an array
 def remove_nils_and_false_from_array(array)
-  array.compact!
-  array.each do |word|
-    if word == false
-      array.delete(word)
-    end
-  end
-  array
+  array.select! { |word| word }
 end
 
 # don't reverse the array, but reverse every word inside it. e.g.
 # ['dog', 'monkey'] becomes ['god', 'yeknom']
 def reverse_every_element_in_array(array)
-  array.each do |word|
-    word.reverse!
-  end
-  array
+  array.map! { |word| word.reverse! }
 end
 
 # given an array of student names, like ['Bob', 'Dave', 'Clive']
@@ -43,9 +29,7 @@ end
 # [['Bob', 'Clive'], ['Bob', 'Dave'], ['Clive', 'Dave']]
 # make sure you don't have the same pairing twice,
 def every_possible_pairing_of_students(array)
-  # b = array.permutation(2).to_a
-  # b.uniq!
-  # b
+  array = array.permutation(2).to_a
 end
 
 # discard the first 3 elements of an array,
@@ -70,16 +54,16 @@ end
 # 'banana' becomes 'ban'. If the string is an odd number of letters
 # round up - so 'apple' becomes 'app'
 def get_first_half_of_string(string)
+  x = (string.length / 2).to_f
+  x += 1 if string.length.odd?
+  string.slice(0, x)
 end
 
 # turn a positive integer into a negative integer. A negative integer
 # stays negative
 def make_numbers_negative(number)
-  if number > 0
-    number * -1
-  else
-    number
-  end
+  return number * -1 if number > 0
+  number
 end
 
 # turn an array of numbers into two arrays of numbers, one an array of
@@ -87,10 +71,7 @@ end
 # even numbers come first
 # so [1, 2, 3, 4, 5, 6] becomes [[2, 4, 6], [1, 3, 5]]
 def separate_array_into_even_and_odd_numbers(array)
-  arry = Array.new
-  arry <<  array.select {|num| num.even? }
-  arry << array.select {|num| num.odd? }
-  arry
+  Array.new([array.select {|num| num.even? }, array.select {|num| num.odd? }])
 end
 
 # count the numbers of elements in an element which are palindromes
@@ -98,11 +79,7 @@ end
 # e.g. 'bob'. So in the array ['bob', 'radar', 'eat'], there
 # are 2 palindromes (bob and radar), so the method should return 2
 def number_of_elements_that_are_palindromes(array)
-  count = 0
-  array.each do |word|
-    count += 1 if word == word.reverse
-  end
-  count
+  array.select! { |word| word == word.reverse }.count
 end
 
 # return the shortest word in an array
@@ -135,7 +112,7 @@ end
 # get the average from an array, rounded to the nearest integer
 # so [10, 15, 25] should return 17
 def average_of_array(array)
-  x = array.inject { |x, y| x += y}.to_f
+  x = array.inject { |x, y| x += y }.to_f
   x = (x / (array.length)).ceil
 end
 
@@ -151,6 +128,7 @@ end
 # pairing up elements. e.g. ['a', 'b', 'c', 'd'] becomes
 # {'a' => 'b', 'c' => 'd'}
 def convert_array_to_a_hash(array)
+  Hash[*array]
 end
 
 # get all the letters used in an array of words and return
@@ -184,21 +162,27 @@ end
 # round up a float up and convert it to an Integer,
 # so 3.214 becomes 4
 def round_up_number(float)
+  float.ceil
 end
 
 # round down a float up and convert it to an Integer,
 # so 9.52 becomes 9
 def round_down_number(float)
+  float.floor
 end
 
 # take a date and format it like dd/mm/yyyy, so Halloween 2013
 # becomes 31/10/2013
 def format_date_nicely(date)
+  date.strftime('%d/%m/%Y')
 end
 
 # get the domain name *without* the .com part, from an email address
 # so alex@makersacademy.com becomes makersacademy
 def get_domain_name_from_email_address(email)
+  x = email.index('@') + 1
+  y = email.index('.')
+  email.slice(x...y)
 end
 
 # capitalize the first letter in each word of a string,
@@ -207,17 +191,28 @@ end
 # 'the lion the witch and the wardrobe' becomes
 # 'The Lion the Witch and the Wardrobe'
 def titleize_a_string(string)
+  string = string.split(' ').each do |word|
+    if word == "and" || word == "the"
+    else
+      word.capitalize!
+    end
+  end
+  string.first.capitalize!
+  string.join(' ')
 end
 
 # return true if a string contains any special characters
 # where 'special character' means anything apart from the letters
 # a-z (uppercase and lower) or numbers
 def check_a_string_for_special_characters(string)
+  return true if /\W/.match(string)
+  false
 end
 
 # get the upper limit of a range. e.g. for the range 1..20, you
 # should return 20
 def get_upper_limit_of(range)
+  range.last
 end
 
 # should return true for a 3 dot range like 1...20, false for a
@@ -227,10 +222,14 @@ end
 
 # get the square root of a number
 def square_root_of(number)
+  Math.sqrt(number)
 end
 
 # count the number of words in a file
 def word_count_a_file(file_path)
+  file = open(file_path)
+  # counts the spaces, plus 1 for first word
+  words = file.read.count(' ') + 1
 end
 
 # --- tougher ones ---
@@ -239,6 +238,7 @@ end
 # called call_method_from_string('foobar')
 # the method foobar should be invoked
 def call_method_from_string(str_method)
+  self.str_method
 end
 
 # return true if the date is a uk bank holiday for 2014
